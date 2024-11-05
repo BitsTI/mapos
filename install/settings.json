@@ -6,7 +6,7 @@
 		"GD",
     "zip"
 	],
-  "database_file": "../banco.sql",
+  "database_file": "../db/banco.sql",
   "writeable_directories": {
     "files": "/updates"
   }
