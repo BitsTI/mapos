@@ -92,7 +92,42 @@ Na pasta raiz onde você está, depois de executar os comandos da seção acima,
 docker build -t mapos:latest .
 ```
 
-Este processo levará alguns minutos, a depender da capacidade e recursos do seu servidor. Assim que terminar, prossiga para as próximas etapas da instalação.
+Este processo levará alguns minutos, a depender da capacidade e recursos do seu servidor. Assim que terminar, prossiga para as próximas etapas da instalação:
+
+```sh
+[+] Building 377.5s (25/25) FINISHED docker:desktop-linux
+ => [internal] load build definition from Dockerfile 0.1s
+ => => transferring dockerfile: 4.06kB0.0s
+ => [internal] load metadata for docker.io/library/php:8.2.5-apache 2.0s
+ => [internal] load .dockerignore                                   0.0s
+ => => transferring context: 100B                                   0.0s
+ => CACHED [ 1/20] FROM docker.io/library/php:8.2.5-apache@...      0.0s
+ => [internal] load build context                                   5.2s
+ => => transferring context: 18.21MB                                5.2s
+ => [ 2/20] RUN apt update && apt upgrade -y...                   339.1s
+ => [ 3/20] RUN curl -sS https://getcomposer.org/installer ...      3.7s
+ => [ 4/20] RUN usermod -u 1000 www-data                            0.6s
+ => [ 5/20] RUN a2enmod rewrite                                     0.6s
+ => [ 6/20] COPY docker/etc/php/php.ini /usr/local/etc/php/...      0.1s
+ => [ 7/20] COPY docker/etc/php/uploads.ini /usr/local/etc/...      0.1s
+ => [ 8/20] RUN apt update && apt install supervisor cron -...     14.8s
+ => [ 9/20] RUN touch /var/log/cron.log                             0.4s
+ => [10/20] COPY docker/etc/php/cron-jobs /etc/cron.d/cron-...      0.0s
+ => [11/20] RUN chmod 0644 /etc/cron.d/cron-jobs                    0.5s
+ => [12/20] RUN crontab /etc/cron.d/cron-jobs                       0.5s
+ => [13/20] WORKDIR /var/www/html/                                  0.0s
+ => [14/20] COPY . .                                                0.2s
+ => [15/20] RUN chown -R www-data:www-data /var/www/html            2.6s
+ => [16/20] RUN chmod -R 777 /var/www/html/install/                 0.5s
+ => [17/20] RUN chmod 777 /var/www/html/updates/ /var/www/h...      0.6s
+ => [18/20] RUN composer install --no-dev                           7.2s
+ => [19/20] RUN mkdir -p /var/log/supervisor                        0.4s
+ => [20/20] COPY docker/etc/supervisor/supervisord.conf /et...      0.0s
+ => exporting to image                                              3.3s
+ => => exporting layers                                             3.3s
+ => => writing image sha256:fd68a482bc08503d0d5dc0d25b23125...      0.0s
+ => => naming to docker.io/library/mapos:latest
+ ```
 
 ### Utilizando o arquivo Compose
 
@@ -102,7 +137,7 @@ No diretório onde estão os arquivos que você baixou acesse a pasta `./docker`
 
 #### Variáveis de ambiente
 
-O sistema de composição do **Docker** se utiliza de variáveis de ambiente que podem ser configuradas para tratar de diferentes ambientes, independentemente. Assim, você pode ter um conjunto de variáveis em um aqruivo `devlopment.env` que se referem ao seu ambiente de desenvolvimento, enquanto para produção, com os dados do seu servidor em nuvem, se utiliza de um `production.env`.
+O sistema de composição do **Docker** se utiliza de variáveis de ambiente que podem ser configuradas para tratar de diferentes ambientes, independentemente. Assim, você pode ter um conjunto de variáveis em um aqruivo `development.env` que se referem ao seu ambiente de desenvolvimento, enquanto para produção, com os dados do seu servidor em nuvem, se utiliza de um `production.env`.
 
 O arquivo `compose.yml` por padrão espera por um arquivo `.env` que esteja localizado na mesma pasta, assim, como podemos ter diferntes e inúmeras versões de configuração de ambiente, na próxima etapa será necessário apontar qual versão você deseja utilizar.
 
@@ -120,19 +155,17 @@ cd docker
 Dentro do diretório `./docker`, no terminal, execute o seguinte comando, escolhendo qual a sua variável de ambiente a ser utilizada (`production.env` neste exemplo):
 
 ```sh
-docker compose -f compose.yml --env-file ./env/production.env up -d --force-recreate
+docker compose -f compose.yml --env-file ./env/production.env up -d
 ```
 
 O terminal agora irá informar você sobre o andamento, o download de todos os arquivos e dependências necessárias, bem como do status da instalação. Quando finalizado, ele apresentará a seguinte mensagem:
 
 ```sh
-[+] Running 5/5
- ✔ Container mapos-mysql       Running     0.0s
- ✔ Container mapos-php-fpm     Running     0.0s
- ✔ Container mapos-composer    Started     1.4s
- ✔ Container mapos-phpmyadmin  Started     1.9s
- ✔ Container mapos-nginx       Started     0.2s
- ```
+[+] Running 3/3
+ ✔ Network map-os_default  Created     0.1s
+ ✔ Container mapos-mysql   Healthy    42.4s
+ ✔ Container mapos         Started    41.9s
+```
 
 Isso significa que todos os serviços foram iniciados corretamente.
 
@@ -147,10 +180,6 @@ Acesse o endereço da aplicação onde ela estiver hospedada:
 
 Neste primeiro acesso, siga o passo a passo de configuração conforme informado em tela, preenchendo os dados solicitados de acordo com os dados que você inseriu no seu arquivo de ambiente `*.env`.
 
-### PhpMyAdmin
-
-Esta stack do Docker também conta com uma instalação do **PhpMyAdmin**, de forma que você pode navegar pelo banco de dados com uma interface gráfica diretamente pelo navegador. Para isso, acesse `http://localhost:{porta}` em que a `porta` é igual à variável configurada no seu arquivo de ambiente `*.env`.
-
 ## Finalização e Cuidados
 
 O seu ambiente está funcional, agora você pode utilizar um proxy reverso como `NGINX` ou `Traefik` para configurar o seu ambiente com o domínio e recursos de `SSL`.
@@ -159,8 +188,3 @@ Certifique-se de garantir segurança à pasta `./docker/data/mysql` pois este é
 
 > [!WARNING]
 > Faça backups regulares da pasta `./docker/data/mysql` para garantir que seu banco de dados esteja seguro!
-
----
-
-> [!CAUTION]
-> Este guia trata de um formato de instalação descontinuado. Certifique-se de utilizar o [formato revisado](./install_docker.md) para novas instalações.

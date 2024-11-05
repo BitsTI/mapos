@@ -64,7 +64,7 @@ No diretório onde estão os arquivos que você baixou acesse a pasta `./docker`
 
 #### Variáveis de ambiente
 
-O sistema de composição do **Docker** se utiliza de variáveis de ambiente que podem ser configuradas para tratar de diferentes ambientes, independentemente. Assim, você pode ter um conjunto de variáveis em um aqruivo `devlopment.env` que se referem ao seu ambiente de desenvolvimento, enquanto para produção, com os dados do seu servidor em nuvem, se utiliza de um `production.env`.
+O sistema de composição do **Docker** se utiliza de variáveis de ambiente que podem ser configuradas para tratar de diferentes ambientes, independentemente. Assim, você pode ter um conjunto de variáveis em um aqruivo `development.env` que se referem ao seu ambiente de desenvolvimento, enquanto para produção, com os dados do seu servidor em nuvem, se utiliza de um `production.env`.
 
 O arquivo `compose-legacy.yml` por padrão espera por um arquivo `.env` que esteja localizado na mesma pasta, assim, como podemos ter diferntes e inúmeras versões de configuração de ambiente, na próxima etapa será necessário apontar qual versão você deseja utilizar.
 
