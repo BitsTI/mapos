@@ -1,0 +1,67 @@
+name: map-os
+
+# networks:
+#     mapos:
+#         name: mapos_default
+#         driver: bridge
+#     nginx_default:
+#         external: true
+
+# volumes:
+#     data_mapos:
+#     data_mysql:
+
+services:
+    mapos:
+        image: mapos:latest
+        container_name: mapos
+        restart: unless-stopped
+        volumes:
+            - /etc/timezone:/etc/timezone:ro
+            - /etc/localtime:/etc/localtime:ro
+            # - data_mapos:/var/www/html
+            - ./data/mapos:/var/www/html
+        environment:
+            - PUID=${PUID:-1000}
+            - PGID=${PGID:-1000}
+            - DASHBOARD_URL=${MAPOS_URL}
+            - TZ=${TZ:-America/Sao_Paulo}
+        depends_on:
+            mysql:
+                condition: service_healthy
+        # networks:
+        #     - mapos
+        #     - nginx_default
+        ports:
+            - ${MAPOS_PORT:-8090}:80
+
+    mysql:
+        image: mysql:${MYSQL_VERSION:-8}
+        container_name: mapos-mysql
+        restart: unless-stopped
+        healthcheck:
+            test:
+                [
+                    "CMD-SHELL",
+                    "mysqladmin -u $$MYSQL_USER -p$$MYSQL_PASSWORD ping -h localhost | grep 'mysqld is alive' || exit 1"
+                ]
+            interval: 10s
+            timeout: 10s
+            retries: 10
+        volumes:
+            - /etc/timezone:/etc/timezone:ro
+            - /etc/localtime:/etc/localtime:ro
+            # - data_mysql:/var/lib/mysql
+            - ./data/mysql:/var/lib/mysql
+        environment:
+            - PUID=${PUID:-1000}
+            - PGID=${PGID:-1000}
+            - MYSQL_DATABASE=${MYSQL_DATABASE:-"mapos"}
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-"S0m#St40N6P4Ss"}
+            - MYSQL_USER=${MYSQL_USER:-"mapos"}
+            - MYSQL_PASSWORD=${MYSQL_PASSWORD:-"S0m#P4S$"}
+            - TZ=${TZ:-America/Sao_Paulo}
+        # networks:
+        #     - mapos
+        ports:
+            - ${DB_PORT:-32769}:3306

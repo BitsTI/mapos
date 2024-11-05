@@ -3,6 +3,11 @@
 /install/files
 /docker/data
 
+# Environment Variables
+.env
+development.env
+production.env
+
 # misc
 .DS_Store
 .vscode
